@@ -26,7 +26,18 @@ export default function move(gameState){
     // TODO: Step 1 - Prevent your Battlesnake from moving out of bounds
     // gameState.board contains an object representing the game board including its width and height
     // https://docs.battlesnake.com/api/objects/board
-    
+    if (myHead.y > gameState.board.height) {
+        moveSafety.up = false;
+    }
+    if (myHead.y < gameState.board.height) {
+        moveSafety.down = false;
+    }
+    if (myHead.x > gameState.board.width) {
+        moveSafety.right = false;
+    }
+    if (myHead.x < gameState.board.width) {
+        moveSafety.left = false;
+    }
     // TODO: Step 2 - Prevent your Battlesnake from colliding with itself
     // gameState.you contains an object representing your snake, including its coordinates
     // https://docs.battlesnake.com/api/objects/battlesnake

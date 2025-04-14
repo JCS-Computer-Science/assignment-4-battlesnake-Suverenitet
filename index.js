@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 const config = {
   apiversion: "1",
-  author: "",       // TODO: Your Battlesnake Username
+  author: "Q",       // TODO: Your Battlesnake Username
   color: "#9999ff", // TODO: Choose color
   head: "smile",  // TODO: Choose head, see https://play.battlesnake.com/customizations/ for options unlocked in your account
   tail: "curled",  // TODO: Choose tail, see https://play.battlesnake.com/customizations/ for options unlocked in your account
@@ -45,9 +45,13 @@ res.end();
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move\
 app.post('/move', (req, res) => {
+  const board = req.body.board
+  const snake = req.body.you; 
+  const food = req.body.board.food;
   res.status(200);
+  const nextMove = move(board);
   let moves = {
-    nextmoves: res.body.nextMove,
+    move: nextMove,
     shout: "hello",
   }
   res.json(moves);
