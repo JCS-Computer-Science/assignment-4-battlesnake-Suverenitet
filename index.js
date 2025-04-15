@@ -49,11 +49,11 @@ res.end();
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move\
 app.post('/move', (req, res) => {
-  const board = req.body.board;
-  const mySnake = req.body.you;
-  const turn = req.body.turn;
+  const board = req.board.body;
+  const mySnake = req.you.body;
+  const turn = req.turn.body;
   res.status(200);
-  const nextMoves = move(req.body);
+  const nextMoves = move(board);
   console.log("Next Moves: ", nextMoves);
   let moves = {
     move: nextMoves,
