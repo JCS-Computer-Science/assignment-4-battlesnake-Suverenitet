@@ -26,7 +26,6 @@ const config = {
 app.get('/', (req, res) => {
   res.status(200);
   res.json(config);
-  console.log("GET / responded with: ", config);
   res.end();
 })
 //TODO: respond to POST requests on "/start". Your response itself is ignored, but must have status code "200"
@@ -34,28 +33,33 @@ app.get('/', (req, res) => {
 //      https://docs.battlesnake.com/api/requests/start
 app.post('/start', (req, res) => {
 res.status(200)
-res.json(req.body.game)
-res.json(req.body.turn)
-res.json(req.body.board)
-res.json(req.body.you)
+res.status(200);
+const gameState = req.body;
+res.json({
+  board: gameState.board,
+  turn: gameState.turn,
+  game: gameState.game,
+  you: gameState.you,
+});
 res.end();
 })
+
 
 //TODO: respond to POST requests on "/move". Your response should be an object with a "move" property and optionally
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move\
 app.post('/move', (req, res) => {
-  const board = req.body.board
-  const snake = req.body.you; 
-  const food = req.body.board.food;
+  const board = req.body.board;
+  const mySnake = req.body.you;
+  const turn = req.body.turn;
   res.status(200);
-  const nextMove = move(board);
+  const nextMoves = move(req.body);
+  console.log("Next Moves: ", nextMoves);
   let moves = {
-    move: nextMove,
+    move: nextMoves,
     shout: "hello",
-  }
+  };
   res.json(moves);
-  res.json(req.body.game)
   res.end();
 })
 
