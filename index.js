@@ -32,14 +32,12 @@ app.get('/', (req, res) => {
 //      the request body will contain objects representing the game instance, game board state, and your snake
 //      https://docs.battlesnake.com/api/requests/start
 app.post('/start', (req, res) => {
-res.status(200)
 res.status(200);
-const gameState = req.body;
 res.json({
-  board: gameState.board,
-  turn: gameState.turn,
-  game: gameState.game,
-  you: gameState.you,
+  board: req.body.board,
+  turn: req.body.turn,
+  game: req.body.game,
+  you: req.body.you,
 });
 res.end();
 })
@@ -49,14 +47,12 @@ res.end();
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move\
 app.post('/move', (req, res) => {
-  const board = req.board.body;
-  const mySnake = req.you.body;
-  const turn = req.turn.body;
+  const gameState = req.body  
   res.status(200);
-  const nextMoves = move(board);
+  const nextMoves = move(gameState);
   console.log("Next Moves: ", nextMoves);
   let moves = {
-    move: nextMoves,
+    move: nextMoves.move,
     shout: "hello",
   };
   res.json(moves);
@@ -66,6 +62,10 @@ app.post('/move', (req, res) => {
 //TODO: respond to POST requests on "/end", which signals the end of a game. Your response itself is ignored, 
 //      but must have status code "200" the request body will contain objects representing the game
 //      https://docs.battlesnake.com/api/requests/end
+app.post('/end', (req, res) => {
+res.status(200);
+res.json(req.body)
+})
 
 const host = '0.0.0.0';
 const port = process.env.PORT || 8000;
