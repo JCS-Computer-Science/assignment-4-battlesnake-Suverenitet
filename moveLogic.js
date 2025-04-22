@@ -93,29 +93,7 @@ export default function move(gameState){
     
     // TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
     // gameState.board.food contains an array of food coordinates https://docs.battlesnake.com/api/objects/board
-    for (let i = 0; i < gameState.board.food.length; i++) {
-        const foodArr = gameState.board.food[i]
-        for (let f = 0; f < foodArr.length; f++) {
-            const foodPos = foodArr[f]
-            if (gameState.you.health <= 85 && myHead.x == foodPos.x + 1 && moveSafety.left === true){
-            nextMove = "left"
-            console.log("moving left for food")
-            }
-            if (gameState.you.health <= 85 && myHead.x == foodPos.x - 1 && moveSafety.right === true){
-                nextMove = "right"
-                console.log("moving right for food")
-            }
-            if (gameState.you.health <= 85 && myHead.y == foodPos.y - 1 && moveSafety.up === true){
-                nextMove = "up"
-                console.log("moving up for food")
-            }
-            if (gameState.you.health <= 85 && myHead.y == foodPos.y + 1 && moveSafety.down === true){
-                nextMove = "down"
-                console.log("moving down for food")
-            }
-
-        }
-    }
+    
     console.log(`MOVE ${gameState.turn}: ${nextMove}`)
     return { move: nextMove };
 }
