@@ -9,6 +9,15 @@ export default function move(gameState){
     // We've included code to prevent your Battlesnake from moving backwards
     const myHead = gameState.you.body[0];
     const myNeck = gameState.you.body[1];
+    const food = gameState.board.food;
+    const snakes = gameState.board.snakes
+    const mySnake = gameState.you
+    const possibleMoves = {
+        up: { x: myHead.x, y: myHead.y + 1 },
+        down: { x: myHead.x, y: myHead.y - 1 },
+        left: { x: myHead.x - 1, y: myHead.y },
+        right: { x: myHead.x + 1, y: myHead.y },
+    };
     
     if (myNeck.x < myHead.x) {        // Neck is left of head, don't move left
         moveSafety.left = false;
@@ -78,6 +87,34 @@ export default function move(gameState){
     }
        }
     // Are there any safe moves left?
+        const predictEnemyMoves = (snake) => {
+        const enemyHead = snake.head;
+        const enemyPossibleMoves = [
+            { x: enemyHead.x, y: enemyHead.y + 1 },
+            { x: enemyHead.x, y: enemyHead.y - 1 },
+            { x: enemyHead.x - 1, y: enemyHead.y },
+            { x: enemyHead.x + 1, y: enemyHead.y },
+        ];
+        return enemyPossibleMoves.filter(move => {
+            return move.x >= 0 && move.x < gameState.board.height &&
+                   move.y >= 0 && move.y < gameState.board.height &&
+                   !snake.body.some(segment => segment.x === move.x && segment.y === move.y);
+        });
+    };
+
+    snakes.forEach(snake => {
+        if (snake.id !== mySnake.id) {
+            const enemyFutureMoves = predictEnemyMoves(snake);
+            enemyFutureMoves.forEach(pos => {
+                for (const move in possibleMoves) {
+                    const myPos = possibleMoves[move];
+                    if (myPos.x === pos.x && myPos.y === pos.y) {
+                        moveSafety[move] = false; // Avoid predicted enemy moves
+                    }
+                }
+            });
+        }
+    });
     
     //Object.keys(moveSafety) returns ["up", "down", "left", "right"]
     //.filter() filters the array based on the function provided as an argument (using arrow function syntax here)
@@ -88,12 +125,43 @@ export default function move(gameState){
         return { move: "down" };
     }
     
-    // Choose a random move from the safe moves
-    const nextMove = safeMoves[Math.floor(Math.random() * safeMoves.length)];
     
     // TODO: Step 4 - Move towards food instead of random, to regain health and survive longer
     // gameState.board.food contains an array of food coordinates https://docs.battlesnake.com/api/objects/board
-    
-    console.log(`MOVE ${gameState.turn}: ${nextMove}`)
-    return { move: nextMove };
-}
+    const distanceToEnemyHeads = (pos) => {
+        const enemyHeads = snakes
+            .filter(snake => snake.id !== mySnake.id) // Exclude yourself
+            .map(snake => snake.head);
+
+        if (enemyHeads.length === 0) return Infinity;
+        return Math.min(...enemyHeads.map(h => Math.abs(h.x - pos.x) + Math.abs(h.y - pos.y)));
+    };
+    const distanceToFood = (pos) => {
+        if (food.length === 0) return Infinity;
+        return Math.min(...food.map(f=> Math.abs(f.x - pos.x) + Math.abs(f.y - pos.y)));
+
+    }
+    let bestMove = safeMoves[0];
+    let minDistanceToEnemy = Infinity;
+    let minDistanceToFood = Infinity;
+     for (const move of safeMoves) {
+        const nextPosition = possibleMoves[move];
+        const distanceToEnemy = distanceToEnemyHeads(nextPosition);
+        const distanceToFoodOption = distanceToFood(nextPosition);
+
+        // Prioritize attacking smaller snakes
+        if (distanceToEnemy < minDistanceToEnemy && mySnake.length > 1) {
+            bestMove = move;
+            minDistanceToEnemy = distanceToEnemy;
+        }
+
+        // If no aggressive option, prioritize food
+        if (distanceToEnemy === Infinity && distanceToFoodOption < minDistanceToFood) {
+            bestMove = move;
+            minDistanceToFood = distanceToFoodOption;
+        }
+    }
+
+    console.log(`MOVE ${gameState.turn}: ${bestMove}`)
+    return { move: bestMove };
+} 
