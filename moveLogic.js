@@ -156,7 +156,7 @@ export default function move(gameState){
         }
 
         // If no aggressive option, prioritize food
-        if (distanceToEnemy === Infinity && distanceToFoodOption < minDistanceToFood) {
+        if (distanceToEnemy > distanceToFoodOption && distanceToFoodOption < minDistanceToFood) {
             bestMove = move;
             minDistanceToFood = distanceToFoodOption;
         }
