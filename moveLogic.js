@@ -4,6 +4,7 @@ export default function move(gameState) {
     const myLength = gameState.you.body.length;
     const food = gameState.board.food;
     const snakes = gameState.board.snakes;
+    const hazards = gameState.board.hazards;
     const maxFloodDepth = gameState.you.body.length * 2;
 
     const possibleMoves = {
@@ -49,7 +50,7 @@ export default function move(gameState) {
                 if (segment.x === pos.x && segment.y === pos.y) {
                     moveSafety[move] = false;
                 }
-            }
+            };
         });
     });
 
@@ -73,11 +74,32 @@ export default function move(gameState) {
         }
     });
 
+    // Avoid hazards unless there are no other safe options
+    let hazardMoves = [];
+    hazards.forEach(hazard => {
+        for (const [move, pos] of Object.entries(possibleMoves)) {
+            if (hazard.x === pos.x && hazard.y === pos.y) {
+                if (moveSafety[move]) {
+                    hazardMoves.push(move);
+                    moveSafety[move] = false; // Mark the move unsafe due to hazard
+                }
+            }
+        }
+    });
+
     // Safe moves
     const safeMoves = Object.keys(moveSafety).filter(move => moveSafety[move]);
 
-    if (safeMoves.length === 0) {
-        console.log(`MOVE ${gameState.turn}: No safe moves detected! Moving down`);
+    // If no safe moves, allow hazard moves
+    if (safeMoves.length === 0 && hazardMoves.length > 0) {
+        hazardMoves.forEach(move => moveSafety[move] = true);
+        console.log(`MOVE ${gameState.turn}: No safe moves detected! Allowing hazard moves.`);
+    }
+
+    const finalSafeMoves = Object.keys(moveSafety).filter(move => moveSafety[move]);
+
+    if (finalSafeMoves.length === 0) {
+        console.log(`MOVE ${gameState.turn}: No safe or hazard moves detected! Moving down`);
         return { move: "down" };
     }
 
@@ -105,6 +127,8 @@ export default function move(gameState) {
                                        neighbor.y >= 0 && neighbor.y < gameState.board.height;
                 const isEmpty = !snakes.some(snake =>
                     snake.body.some(segment => segment.x === neighbor.x && segment.y === neighbor.y)
+                ) && !hazards.some(hazard =>
+                    hazard.x === neighbor.x && hazard.y === neighbor.y
                 );
                 if (isWithinBounds && isEmpty) queue.push(neighbor);
             });
@@ -122,10 +146,10 @@ export default function move(gameState) {
     };
 
     // Scoring moves
-    let bestMove = safeMoves[0];
+    let bestMove = finalSafeMoves[0];
     let maxScore = -Infinity;
 
-    for (const move of safeMoves) {
+    for (const move of finalSafeMoves) {
         const pos = possibleMoves[move];
         const safeAreaSize = calculateSafeArea(pos);
         const toFood = distanceToFood(pos);
